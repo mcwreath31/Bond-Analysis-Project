@@ -95,6 +95,6 @@ server <- function(input, output) {
 
 shinyApp(ui = ui, server = server)
 
-##TODO fix table rendering issue and add second tab with Rmd file that explains the mathmatics behind the function used in the analysis. 
+##TODO fix table rendering issue and add second tab with Rmd file that explains the mathematics behind the function used in the analysis. 
 
 
