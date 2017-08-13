@@ -1,0 +1,84 @@
+---
+title: "Fixed Income"
+author: "Kyle McWreath"
+date: "8/13/2017"
+output: html_document
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+This applicaiton discusses the effects of default risk on the retunrs from holding bonds to matruity. The expected return on a bond is differnt from the bond's promised retun. I use a Markov model to solve for the expected rate of return a risky bond. The procedure take into account the probability of default, the transition of the issuer from one state of credit worthiness to another and the percentage recovery of face value when the bond defaults.
+
+## Calculating The Expected Retun in a One-Period Framework
+
+* $F$  = face value of a bond
+* $P$  = price of a bond
+* $Q$  = annual coupon rate of the bond
+* $\pi$  = probibility that the bond will not default at end of year
+* $\lambda$ = fraction of bond's value bondholders collect upon default
+
+The bond's expected end of year cash flow is: 
+$\pi*(1+Q)*F+(1-\pi)*\lambda*F$
+
+One year bond expected return = $\frac {\pi*(1+Q)*F+(1-\pi)*\lambda*F}{P}-1$
+
+
+
+
+
+```{r eruptions, echo=FALSE}
+inputPanel(
+  numericInput("fv", label = "Choose Face Value:",
+              value = 100, min = 1, max = 20),
+    numericInput("price", label = "Choose Price of the Bond:",
+              value = 5, min = 1, max = 100),
+  
+  numericInput("q", label = "Choose the Annual Coupon Rate of the Bond:",
+              value = 5, min = 1, max = 100),
+  
+   numericInput("pi", label = "Choose the Probability that The Bond will not Default",
+              value = .5, min = 0, max = 1),
+  numericInput("lam", label = "Fraction of bond's value bondholders collect upon default",
+              value = .5, min = 0, max = 1)
+
+)
+
+renderTable({
+  
+  x <- input$fv(1+inputq)*(1-input$pi)+input$fv*input$lam*input$pi
+  
+  y = ((input$fv(1+inputq)*(1-input$pi)+input$fv*input$lam*input$pi)/input$price)-1
+  
+  
+ tab<- Matrix(ncol=2, nrow = 2, dimnames = rep(list(rating = c("Expected Period 1 Cash Flow", "Expected Return")),2), c(x,y))
+ tab 
+ 
+})
+  
+  
+```
+
+## Embedded Application
+
+It's also possible to embed an entire Shiny application within an R Markdown document using the `shinyAppDir` function. This example embeds a Shiny application located in another directory:
+
+```{r tabsets, echo=FALSE}
+shinyAppDir(
+  system.file("examples/06_tabsets", package = "shiny"),
+  options = list(
+    width = "100%", height = 550
+  )
+)
+```
+
+Note the use of the `height` parameter to determine how much vertical space the embedded application should occupy.
+
+You can also use the `shinyApp` function to define an application inline rather then in an external directory.
+
+In all of R code chunks above the `echo = FALSE` attribute is used. This is to prevent the R code within the chunk from rendering in the document alongside the Shiny components.
+
+
+
