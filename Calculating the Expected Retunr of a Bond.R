@@ -29,9 +29,8 @@ ui <- fluidPage(
       
       numericInput("marketvalue", "Current Market Price (% of Face Value) :",100, 1, max = 100),
       
-      numericInput("price", "Current Market Price (% of Face Value) :",100, 1, max = 100),
       
-      numericInput("lam", "The Bonds Recovery % if Defaulted) :",100, 1, max = 100),
+      numericInput("lam", "The Bonds Recovery % if Defaulted) :",50, 1, max = 100),
     
       numericInput("pi", "The Probability the the Bond will Default %) :",5, 0, max = 100)
       ),
@@ -40,7 +39,7 @@ ui <- fluidPage(
                tableOutput("cf"),tableOutput("cf2"),
                tableOutput("mytable"),
                tableOutput("initial"),
-               dataTableOutput("matrix")
+               tableOutput("markovmatrix")
         
             
     )
@@ -99,7 +98,7 @@ server <- function(input, output) {
   })
   
   
-  output$matrix <- renderDataTable({
+  output$markovmatrix <- renderTable({
     
     
     new <-matrix(nr= 5, nc = 5, dimnames = rep(list(rating = c("A", "B","C","D", "E")),2), c(.97,.05,.01,0,0,
@@ -125,13 +124,13 @@ server <- function(input, output) {
       
     }
     
-    Mmatrix(new, input$N)
+  xxx<- Mmatrix(new, input$N)
     
-    
+    xxx
     
   })
   
-  output$matrix <- renderTable({
+  output$initial <- renderTable({
 
     initalstateofbond <- function(state1) {
       
