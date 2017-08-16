@@ -68,7 +68,7 @@ DT:: renderDataTable({
 ##Calculating a Bond's Expected Return in a Multi-Period Framework
 Now we use a basic Markov model that utilizes a ratings transition matrix to compute a bonds expected return
   
-* Assuming a simple ratings system: 
+Assuming a simple ratings system: 
   
  
 $$ \Pi =
@@ -81,9 +81,9 @@ $$ \Pi =
 \end{vmatrix}
 $$
     
-* The probabilities in each row of the matrix $\Pi$ indicate the probability that in one period the bond will go from a rating of $i$ to $j$
+The probabilities in each row of the matrix $\Pi$ indicate the probability that in one period the bond will go from a rating of $i$ to $j$
 
-    
+In order to calculate the expected return on a risky bond we must assume default probabilities of each of the ratings, A,B,C,D and E.    
     
     
 ```{r, results='asis', echo=FALSE}
@@ -93,5 +93,103 @@ $$
 knitr::kable(new, full_width = F)
 ```
 
+The table above indicates that if a bond is rated A in the current period, there is a probability of 0.97 that it will still be rate A in the next period.  
 
-##TO DO: Add the tranisition matrix function that I built last weekend and create reactive output
+There is a probability of 0.02 that it will be rated B in the next period and a probibility of 0.01 that it will be rated C.  
+
+It is impossible for a bond to be rated A today and D or E in the subsequwnt period.   
+
+A bond that starts off with a rating of B can in a subsequent period be rated A with a probability of 0.05, be rated B with a probability of 0.8 or be rated C with a probibility of 0.15  
+
+The transition probabilities from state C to states A, B, C are 0.01, 0.02, 0.75, 0.22.  
+
+While it is possible to go from ratings A, B, C to any of ratings A, B, C, or D, it is not possible to go from A, B, C to E. This is true because E denotes that default took place in the previous period.  
+
+A bond that is currently in state D (first time default) will necessarily be in E in the next period. This is why the fourth row of matrix 
+the matrix described abovewill always be:
+$$
+\begin{vmatrix}
+0&0&0&0&1\\
+ \end{vmatrix}
+$$  
+Once the rating is in E it reamins there permanently. 
+
+##The Multi-Period Transtion Matrix  
+The martix described above defines the transition probabilities ove one period  
+The two period transition probabilities are given by the matrix product $\Pi *\Pi$.  
+The interactive table below shows the two year trasnitions probability of default and can be adjusted for any number of periods: 
+
+```{r}
+
+##define the trasnstion probabilities over 1 period.
+period1 <-matrix(nr= 5, nc = 5, dimnames = rep(list(rating = c("A","B","C","D","E")),2), 
+c(.97,.05,.01,0,0,.02,.8,.02,0,0,.01,.15,.75,0,0, 0,0,.22,.0,0, 0,0,0,1,1))
+
+period1
+##The use of the defined Mmatrix function below provides a simple way to calculate the default probabilites of a given bond in any number of periods
+Mmatrix <- function(matrix, n) {
+  
+
+ if (n == 1){
+    print(matrix)
+ } 
+  else { matrix%^%n
+  }
+}
+
+##Testing the function above for a 2 period transition probability matrix:
+library(expm)
+Mmatrix(period1,2)
+```  
+The two period transition matrix above implies that if a bond is rated "B" today, there is a probability of 9.4% that in two periods it will be rated "A", a probability of 64.4% that in two periods it will be rated B, a probability of 23.3% that in two periods it will be rated C and a probability of 3.3% that in two periods it will default (rated D)  
+
+In general, the year $t$ transisiton matrix is given by the matrix power $\Pi{^t}$:  
+
+
+```{r echo=FALSE}
+shinyUI(fluidPage(
+
+sidebarLayout(
+  
+  sidebarPanel(
+   tags$style("[type = 'number'] {font-size:18px;}"),
+   numericInput("year", label = "Choose the number of periods:",
+              value = 3, min = 1, max = 100, width = '1000%', step= 1)
+    
+   ),
+
+mainPanel(
+  dataTableOutput("year")
+ 
+   ) 
+  )
+ )
+)
+```
+```{r echo = FALSE} 
+  
+  period1 <-matrix(nr= 5, nc = 5, dimnames = rep(list(rating = c("A","B","C","D","E")),2), 
+c(.97,.05,.01,0,0,.02,.8,.02,0,0,.01,.15,.75,0,0, 0,0,.22,.0,0, 0,0,0,1,1))
+  
+Mmatrix <- function(matrix, n) {
+  
+
+ if (n == 1){
+    print(matrix)
+ } 
+  else { matrix%^%n
+  }
+}
+
+DT:: renderDataTable({
+  
+    DT:: datatable(Mmatrix(period1, input$year),escape = FALSE, options = list(dom = 't'), caption = paste(c(input$year, "- Period Transition Probability Matrix"),collapse = " "))
+ 
+             
+                       
+})
+  ```
+ 
+ 
+ 
+ ##TO DO add The Bond Payoff Vector function created last weekend
