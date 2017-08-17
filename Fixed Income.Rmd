@@ -10,22 +10,22 @@ runtime: shiny
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-This applicaiton illustrates the effects of default risk on the returns from holding bonds to matruity. The expected return on a bond is differnt from the bond's promised retun. I use a Markov model to solve for the expected rate of return a risky bond. The process takes into account the probability of default, the transition of the issuer from one state of credit worthiness to another and the percentage recovery of face value when the bond defaults.
+This application illustrates the effects of default risk on the returns from holding bonds to maturity. The expected return on a bond is different from the bond's promised return. I use a Markov model to solve for the expected rate of return on a risky bond. The process takes into account the probability of default, the transition of the issuer from one state of credit worthiness to another and the percentage recovery of face value when the bond defaults.
 
 ## Calculating The Expected Return in a One-Period Framework
 
 * $F$  = face value of a bond
 * $P$  = price of a bond
 * $Q$  = annual coupon rate of the bond
-* $\pi$  = probibility that the bond will not default at end of year
-* $\lambda$ = fraction of bond's valuethe bondholder will collect upon default
+* $\pi$  = probability that the bond will not default at end of year
+* $\lambda$ = fraction of bond's value the bondholder will collect upon default
 
  The bond's expected end of year cash flow is calculated as: 
 $\pi*(1+Q)*F+(1-\pi)*\lambda*F$
 
 The one year expected return of the bond is calculated as= $\frac {\pi*(1+Q)*F+(1-\pi)*\lambda*F}{P}-1$
 
-Below you can analyze the realtionship between the varaibles of the bond and the expected cash flow:
+Below you can analyze the relationship between the variables of the bond and the expected cash flow:
 
 
 
@@ -57,7 +57,7 @@ DT:: renderDataTable({
   
   x <- matrix(c(x,y),nrow = 1, ncol = 2)
  
-  DT:: datatable(x, colnames =c("Expected Cash FLow at End of Year 1", "Expectd Return %"), escape = FALSE, options = list(dom = 't'))
+  DT:: datatable(x, colnames =c("Expected Cash Flow at End of Year 1", "Expectd Return %"), escape = FALSE, options = list(dom = 't'))
  
              
                        
@@ -95,29 +95,29 @@ knitr::kable(new, full_width = F)
 
 The table above indicates that if a bond is rated A in the current period, there is a probability of 0.97 that it will still be rate A in the next period.  
 
-There is a probability of 0.02 that it will be rated B in the next period and a probibility of 0.01 that it will be rated C.  
+There is a probability of 0.02 that it will be rated B in the next period and a probability of 0.01 that it will be rated C.  
 
-It is impossible for a bond to be rated A today and D or E in the subsequwnt period.   
+It is impossible for a bond to be rated A today and D or E in the subsequent period.   
 
-A bond that starts off with a rating of B can in a subsequent period be rated A with a probability of 0.05, be rated B with a probability of 0.8 or be rated C with a probibility of 0.15  
+A bond that starts off with a rating of B can in a subsequent period be rated A with a probability of 0.05, be rated B with a probability of 0.8 or be rated C with a probability of 0.15  
 
 The transition probabilities from state C to states A, B, C are 0.01, 0.02, 0.75, 0.22.  
 
 While it is possible to go from ratings A, B, C to any of ratings A, B, C, or D, it is not possible to go from A, B, C to E. This is true because E denotes that default took place in the previous period.  
 
 A bond that is currently in state D (first time default) will necessarily be in E in the next period. This is why the fourth row of matrix 
-the matrix described abovewill always be:
+the matrix described above will always be:
 $$
-\begin{vmatrix}
+ The~5th~row~of~matrix~ \Pi = \begin{vmatrix}
 0&0&0&0&1\\
  \end{vmatrix}
 $$  
-Once the rating is in E it reamins there permanently. 
+Once the rating is in E it remains there permanently. 
 
 ##The Multi-Period Transtion Matrix  
-The martix described above defines the transition probabilities ove one period  
+The matrix described above defines the transition probabilities in one period. 
 The two period transition probabilities are given by the matrix product $\Pi *\Pi$.  
-The interactive table below shows the two year trasnitions probability of default and can be adjusted for any number of periods: 
+The interactive table below shows the two year transition probability of default and can be adjusted for any number of periods: 
 
 ```{r}
 
@@ -143,7 +143,7 @@ Mmatrix(period1,2)
 ```  
 The two period transition matrix above implies that if a bond is rated "B" today, there is a probability of 9.4% that in two periods it will be rated "A", a probability of 64.4% that in two periods it will be rated B, a probability of 23.3% that in two periods it will be rated C and a probability of 3.3% that in two periods it will default (rated D)  
 
-In general, the year $t$ transisiton matrix is given by the matrix power $\Pi{^t}$:  
+In general, the year $t$ transition matrix is given by the matrix power $\Pi{^t}$:  
 
 
 ```{r echo=FALSE}
@@ -188,8 +188,79 @@ DT:: renderDataTable({
              
                        
 })
-  ```
- 
- 
- 
- ##TO DO add The Bond Payoff Vector function created last weekend
+  ```  
+  
+If you set the above transition matrix to 10 periods, you can see that if a bond started out with an A rating, there is a probability of 1.48% that the bond will be in default at the end of 10 periods and a 7.06% probability that it will have defaulted in a previous period (rated E).
+
+  
+## The Bond Payoff Vector  
+  
+Above we defined $Q$ as the bonds coupn rate and $\lambda$ as the recovery percentage payoff of face value if the bond defaults.  
+The payoff vector of the bond depends on whether the bond is currently in its last period $N$ or whether $t < N$.  
+
+    
+\[ Payoff(t,t<N) = \left( \begin{array}{cc}
+Q\\
+Q\\
+Q\\
+\lambda\\
+0\\
+\end{array} 
+%
+\right)
+Payoff(t, T = N) = \left(\begin{array}{cc}
+1 + Q \\
+1 + Q \\
+1 + Q \\
+\lambda \\
+0 \\
+\end{array} \right)
+\]  
+* The first three elements of each vector denote the payoff in non-defaulted states  
+* The fourth element \lambda is the payoff if the rating is D  
+* The fifth element  0 is the payoff if the bond rating is E(E is the rating for the period after the bond defaults)  
+
+The initial state payoff vector
+
+* The initial state vector is a vector with a 1 for the current rating of the bond and zeros elsewhere
+* If the bond has a rating of A at date 0 then: 
+  $$
+ initial = \begin{vmatrix}
+1&0&0&0&0\\
+ \end{vmatrix}
+$$   
+* If the bond has a rating of B at date 0 then:
+  $$
+ initial = \begin{vmatrix}
+0&1&0&0&0\\
+ \end{vmatrix}
+$$  
+  
+    
+##Expected Bond Payoff in Period $t$:  
+  
+  $E[Payoff(t)] = Initial* \Pi{^t}*Payoff(t)$  
+  
+  #Initial state vector
+  initialstateofbond <- function(state1) {
+      
+      if (state1 == 'A') {
+        nep <- matrix(nr= 5, nc = 1, dimnames = rep(list(rating = c("A","B","C","D","E")),1), c(1,0,0,0,0))
+      }
+      else if (state1=='B'){
+        nep <- matrix(nr= 5, nc = 1, dimnames = rep(list(rating = c("A","B","C","D","E")),1), c(0,1,0,0,0))
+      }
+      else if (state1=='C'){
+        nep <- matrix(nr= 5, nc = 1, dimnames = rep(list(rating = c("A","B","C","D","E")),1), c(0,0,1,0,0))
+      }
+      
+      else if (state1=='D'){
+        nep <- matrix(nr= 5, nc = 1, dimnames = rep(list(rating = c("A","B","C","D","E")),1), c(0,0,0,1,0))
+      }
+      else if (state1=='E'){
+        nep <- matrix(nr= 5, nc = 1, dimnames = rep(list(rating = c("A","B","C","D","E")),1), c(0,0,0,0,1))
+      }
+      
+      
+    } 
+###TO Do Create App that evaluates all inputs and plots outputs
